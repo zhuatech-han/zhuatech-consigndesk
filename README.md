@@ -1,3 +1,5 @@
+[中文](README.md) | [English](README.en.md)
+
 <p><img src="frontend/public/brand/logo.jpg" height="48" alt="知华科技正式LOGO"></p>
 
 # ConsignDesk · 知华寄售商品与货主结算
@@ -6,7 +8,7 @@
 
 知华科技（上海如静知华信息科技有限公司） · [官网](https://www.zhuatech.cn/) · 商业咨询微信 **zhuatech / zhuatech2**。
 
-寄售门店收的是货主的实物，销售后按约定分成。ConsignDesk 将货主申请、独立审核、收货上架、销售凭据、退款、到期取回和货主结算放在同一份可核对记录里，适合二手服饰、收藏品及家居寄售门店和为其实施软件的团队。中文 / English 界面，独立私有部署。
+寄售门店收的是货主的实物，销售后按约定分成。ConsignDesk 将货主申请、独立审核、收货上架、销售凭据、退款、到期取回和货主结算放在同一份可核对记录里，适合二手服饰、收藏品及家居寄售门店和为其实施软件的团队。基于 Java 21／Spring Boot、Vue 3、MySQL 和 Flyway，提供中文 / English 界面与独立私有部署。
 
 ## 一件实物从进店到结算
 
@@ -33,6 +35,15 @@
 | 角色权限                                   | 手机业务端                                |
 | ![角色权限](docs/screenshots/roles.jpg)    | ![手机](docs/screenshots/mobile.jpg)      |
 
+- 登录：以实际账号进入授权工作空间。
+- 货主商品：仅查看与维护本人寄售实物。
+- 商品详情：查看冻结约定、收货、销售和状态历史。
+- 货主结算：核对有符号余额、未到期分成、可付款额和资金流水。
+- 账号管理：配置部门、角色、货主绑定和启用状态。
+- 工作台统计：汇总授权范围内状态、净销售及门店分成。
+- 角色权限：维护接口权限与数据范围。
+- 手机业务端：在窄屏布局中处理本人商品与台账。
+
 ## 能力和边界
 
 | 模块       | 实现内容                                                                                     |
@@ -51,7 +62,7 @@
 
 ## 启动自己的实例
 
-环境：Java **21**、Maven **3.9**、Node **24.19.0+**、MySQL **8.4**、Docker及Compose v2。后端 Spring Boot **4.0.7** / Spring Security / JPA / Flyway；前端 Vue **3.5.40** / Vite **8.1.5**；MariaDB Java Client **3.5.10** 连接 MySQL 8.4（`jdbc:mariadb://`）。
+环境：Python 3、Java **21**、Maven **3.9**、Node **24.19.0+**、MySQL **8.4**、Docker及Compose v2。后端 Spring Boot **4.0.7** / Spring Security / JPA / Flyway；前端 Vue **3.5.40** / Vite **8.1.5**；MariaDB Java Client **3.5.10** 连接 MySQL 8.4（`jdbc:mariadb://`）。
 
 ```sh
 python3 scripts/init-env.py
@@ -74,7 +85,7 @@ docker compose up -d --build --wait
 | COOKIE_SECURE                   | 本机HTTP false；正式HTTPS true                |
 | DATABASE_URL / DATABASE_USER    | 可选外部MySQL；需配置verify-full和可信CA      |
 
-`.env.example`只含配置名，不含密码。数据库没有主机端口；Nginx同源转发`/api`，前端不写死后端主机。分别开发时先`docker compose up -d mysql --wait`，安全注入可达MySQL的`DATABASE_URL`、`DATABASE_USER`、`DATABASE_PASSWORD`和管理员初始化环境变量，再`mvn -f backend/pom.xml spring-boot:run`；`cd frontend && npm ci --no-audit --no-fund && npm run dev`，Vite默认5173代理8080。
+[.env.example](.env.example)只含配置名，不含密码。数据库没有主机端口；Nginx同源转发`/api`，前端不写死后端主机。分别开发时先`docker compose up -d mysql --wait`，安全注入可达MySQL的`DATABASE_URL`、`DATABASE_USER`、`DATABASE_PASSWORD`和管理员初始化环境变量，再`mvn -f backend/pom.xml spring-boot:run`；`cd frontend && npm ci --no-audit --no-fund && npm run dev`，Vite默认5173代理8080。数据库默认不暴露宿主端口，宿主后端需独立开发数据库或私有回环端口映射；不要连接实际业务库做验收。
 
 ## 工程、数据及升级
 
@@ -112,7 +123,7 @@ python3 scripts/release-check.py
 git diff --check
 ```
 
-H2的HTTP/JPA回归不替代真实MySQL空卷验收，Docker Maven不跳过测试。仅对全新可丢弃测试实例执行`TEST_URL=http://127.0.0.1:8120 python3 scripts/smoke-test.py`，不能用于已有业务库。详见[测试](docs/testing.md)。
+H2的HTTP/JPA回归不替代真实MySQL空卷验收，Docker Maven不跳过测试。仅对全新可丢弃测试实例执行`TEST_URL=http://127.0.0.1:8120 python3 scripts/smoke-test.py`，不能用于已有业务库。详见[测试](docs/testing.md)。在完成测试和页面操作后，使用 `python3 scripts/persistence-check.py --capture` 保存被忽略的私有响应快照；重启或独立恢复后，通过 `TEST_URL` 指向对应环境，不加 `--capture` 运行同脚本比较原账号、商品、销售和资金台账。
 
 - 无法启动：核对环境变量、端口和三容器健康；查看本实例日志，不删其他项目数据。
 - 货主无法进入：核对绑定、同部门、角色CONSIGNOR范围及仅portal权限、货主启用状态。
@@ -139,3 +150,5 @@ H2的HTTP/JPA回归不替代真实MySQL空卷验收，Docker Maven不跳过测�
 服务范围：商业源码授权、私有部署、POS接口适配、历史数据迁移、业务规则定制与系统集成。商业部署、为客户交付、二次销售及SaaS经营须取得对应书面授权；不默认转让版权。
 
 <table><tr><td align="center"><img src="docs/images/wechat-zhuatech.png" height="200" alt="知华科技微信zhuatech"><br>微信：zhuatech</td><td align="center"><img src="docs/images/wechat-zhuatech2.png" height="200" alt="知华科技微信zhuatech2"><br>微信：zhuatech2</td></tr></table>
+
+商业授权或深度定制开发请联系知华科技。
